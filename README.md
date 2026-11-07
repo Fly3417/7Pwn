@@ -44,6 +44,7 @@
 
 Pastikan kamu sudah menginstal **Node.js**, **Git**, dan **SQLMap** di Termux. Salin seluruh perintah di bawah ini (klik ikon *Copy* di pojok kanan atas), lalu tempelkan ke Termux:
 
+```
 # 1. Update dan Install Dependensi Sistem
 pkg update && pkg upgrade -y
 pkg install nodejs git sqlmap -y
@@ -57,7 +58,7 @@ npm install
 
 # 4. Jalankan Framework
 node index.js
-
+```
 ---
 
 🛠️ Konfigurasi
