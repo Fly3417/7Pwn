@@ -12,12 +12,13 @@
 
 ## 📸 Tampilan Framework
 
-<div style="overflow-x: auto; white-space: nowrap; padding-bottom: 10px;">
-  <img src="./assets/recon.png" width="300" style="margin-right: 10px; border-radius: 6px; border: 1px solid #1f2937;">
-  <img src="./assets/menu.png" width="300" style="margin-right: 10px; border-radius: 6px; border: 1px solid #1f2937;">
-  <img src="./assets/exit.png" width="300" style="margin-right: 10px; border-radius: 6px; border: 1px solid #1f2937;">
-</div>
+<p align="center">
+  <img src="./assets/menu.png" alt="7Pwn Main Menu" width="100%" style="max-width: 800px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+</p>
 
+<p align="center">
+  <i>7Pwn Universal Framework — Interactive CLI Interface</i>
+</p>
 ---
 
 ## 🚀 Fitur Utama (Kill Chain)
