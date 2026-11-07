@@ -85,11 +85,12 @@ Semua pengaturan tersimpan di config.json:
 ├── targets/            # Daftar URL target yang rentan
 ├── loot/               # Tempat penyimpanan hasil dump database
 └── assets/             # Gambar untuk README
+```
+---
 🚧 Status Pengembangan
 
 7Pwn masih dalam tahap pengembangan aktif (Beta).
 Jika kamu menemukan bug, error, atau ingin memberikan saran fitur baru, silakan hubungi kontak di bawah ini. Kami sangat terbuka untuk feedback dari Security Researcher lain!
-```
 
 ---
 
