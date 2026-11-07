@@ -24,23 +24,18 @@
 
 `7Pwn` membagi proses *Pwning* menjadi 4 fase otomatis:
 
-**1. Reconnaissance (Menu 1):**
-- **Mass Dorking:** Mencari target massal via Bing dengan rotasi kata kunci.
-- **Auto-Validate:** Langsung mengetes URL yang ditemukan dengan *payload* SQLi/LFI/RCE.
-- **GitHub Payload Manager:** Mengunduh ribuan *payload* dari repositori GitHub (mendukung Token untuk menghindari *rate limit*).
-- **WAF Detector:** Mendeteksi proteksi (Cloudflare, Imperva) sebelum menyerang.
-
-**2. Exploitation (Menu 2):**
-- **Auto-Exploit SQLi:** Menembak target dengan `sqlmap` secara *real-time*.
-- **Auto-Exploit RCE/LFI:** Menembakkan *payload* Command Injection & membaca file server.
-- **Auto-Path Analyzer:** Menganalisis *error message* untuk menemukan *Document Root* server (tidak menebak `/var/www/html/`).
-
-**3. Weaponize / Deploy (Menu 2 -> 3):**
-- Menanam *Webshell* via `INTO OUTFILE`. Bisa dari file lokal HP atau *Raw URL* GitHub.
-
-**4. Post-Exploitation (Menu 3):**
-- **Interactive Shell:** Terminal interaktif (RCE) untuk mengeksekusi perintah (`ls`, `whoami`, `cat /etc/passwd`).
-- **Defacement:** Mengubah halaman depan target.
+| Fase | Fitur | Deskripsi |
+| :--- | :--- | :--- |
+| **1. Recon** | Mass Dorking | Mencari target massal via Bing dengan rotasi kata kunci. |
+| | Auto-Validate | Langsung mengetes URL dengan *payload* SQLi/LFI/RCE. |
+| | GitHub Payload Manager | Mengunduh *payload* dari repositori GitHub (via Token). |
+| | WAF Detector | Mendeteksi proteksi (Cloudflare, Imperva) sebelum menyerang. |
+| **2. Exploit** | Auto-Exploit SQLi | Menembak target dengan `sqlmap` secara *real-time*. |
+| | Auto-Exploit RCE/LFI | Menembakkan *payload* Command Injection & membaca file server. |
+| | Auto-Path Analyzer | Menganalisis *error message* untuk menemukan *Document Root* server. |
+| **3. Weaponize**| Webshell Deployer | Menanam *Webshell* via `INTO OUTFILE` dari file lokal atau *Raw URL* GitHub. |
+| **4. Post-Exploit**| Interactive Shell | Terminal interaktif (RCE) untuk mengeksekusi perintah (`ls`, `whoami`). |
+| | Defacement | Mengubah halaman depan target. |
 
 ---
 
@@ -65,14 +60,15 @@ node index.js
 ```
 ---
 
-🛠️ Konfigurasi
+## 🛠️ Konfigurasi
 
-Semua pengaturan tersimpan di config.json:
+Semua pengaturan utama tersimpan di dalam file `config.json`:
 
-· github_token: Masukkan Personal Access Token GitHub kamu agar bisa mengunduh payload tanpa terkena batas 60 request/jam.
-· tamper_scripts: Daftar tamper SQLMap untuk melewati WAF.
-· use_proxy: Set true jika ingin menggunakan proxy (atur di proxy_url).
-
+| Parameter | Deskripsi |
+| :--- | :--- |
+| `github_token` | Masukkan Personal Access Token GitHub kamu agar bisa mengunduh *payload* tanpa terkena batas 60 *request*/jam. |
+| `tamper_scripts` | Daftar *tamper* SQLMap untuk melewati WAF. |
+| `use_proxy` | Set `true` jika ingin menggunakan proxy (atur alamatnya di `proxy_url`). |
 ---
 
 ## 📂 Struktur Project
