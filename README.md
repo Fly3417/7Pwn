@@ -24,18 +24,39 @@
 
 `7Pwn` membagi proses *Pwning* menjadi 4 fase otomatis:
 
-| Fase | Fitur | Deskripsi |
-| :--- | :--- | :--- |
-| **1. Recon** | Mass Dorking | Mencari target massal via Bing dengan rotasi kata kunci. |
-| | Auto-Validate | Langsung mengetes URL dengan *payload* SQLi/LFI/RCE. |
-| | GitHub Payload Manager | Mengunduh *payload* dari repositori GitHub (via Token). |
-| | WAF Detector | Mendeteksi proteksi (Cloudflare, Imperva) sebelum menyerang. |
-| **2. Exploit** | Auto-Exploit SQLi | Menembak target dengan `sqlmap` secara *real-time*. |
-| | Auto-Exploit RCE/LFI | Menembakkan *payload* Command Injection & membaca file server. |
-| | Auto-Path Analyzer | Menganalisis *error message* untuk menemukan *Document Root* server. |
-| **3. Weaponize**| Webshell Deployer | Menanam *Webshell* via `INTO OUTFILE` dari file lokal atau *Raw URL* GitHub. |
-| **4. Post-Exploit**| Interactive Shell | Terminal interaktif (RCE) untuk mengeksekusi perintah (`ls`, `whoami`). |
-| | Defacement | Mengubah halaman depan target. |
+<details>
+<summary><b>1. Reconnaissance (Menu 1)</b></summary>
+<br>
+
+- **Mass Dorking:** Mencari target massal via Bing dengan rotasi kata kunci.
+- **Auto-Validate:** Langsung mengetes URL yang ditemukan dengan *payload* SQLi/LFI/RCE.
+- **GitHub Payload Manager:** Mengunduh ribuan *payload* dari repositori GitHub (mendukung Token untuk menghindari *rate limit*).
+- **WAF Detector:** Mendeteksi proteksi (Cloudflare, Imperva) sebelum menyerang.
+</details>
+
+<details>
+<summary><b>2. Exploitation (Menu 2)</b></summary>
+<br>
+
+- **Auto-Exploit SQLi:** Menembak target dengan `sqlmap` secara *real-time*.
+- **Auto-Exploit RCE/LFI:** Menembakkan *payload* Command Injection & membaca file server.
+- **Auto-Path Analyzer:** Menganalisis *error message* untuk menemukan *Document Root* server (tidak menebak `/var/www/html/`).
+</details>
+
+<details>
+<summary><b>3. Weaponize / Deploy (Menu 2 -> 3)</b></summary>
+<br>
+
+- Menanam *Webshell* via `INTO OUTFILE`. Bisa dari file lokal HP atau *Raw URL* GitHub.
+</details>
+
+<details>
+<summary><b>4. Post-Exploitation (Menu 3)</b></summary>
+<br>
+
+- **Interactive Shell:** Terminal interaktif (RCE) untuk mengeksekusi perintah (`ls`, `whoami`, `cat /etc/passwd`).
+- **Defacement:** Mengubah halaman depan target.
+</details>
 
 ---
 
