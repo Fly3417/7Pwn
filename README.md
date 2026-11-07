@@ -98,14 +98,16 @@ Jika kamu menemukan bug, error, atau ingin memberikan saran fitur baru, silakan 
 
 ---
 
-⚠️ DISCLAIMER (PENTING!)
+> [!CAUTION]
+> **DISCLAIMER (PENTING!)**
+> 
+> `7Pwn` dibuat HANYA untuk tujuan edukasi, penelitian keamanan, dan pengujian pada sistem yang telah mendapatkan izin tertulis (*Authorized Penetration Testing*).
+> 
+> - Penulis (**SevenByte**) tidak bertanggung jawab atas penyalahgunaan alat ini.
+> - Menggunakan alat ini untuk menyerang target tanpa izin adalah **TINDAKAN PIDANA** (UU ITE di Indonesia, atau hukum siber di negara lain).
+> - Selalu gunakan target latihan legal seperti `testphp.vulnweb.com`, lab lokal (DVWA), atau VPS milikmu sendiri.
+> - **Jangan pernah** menggunakan fitur Deploy Webshell atau Defacement pada sistem milik orang lain.
 
-7Pwn dibuat HANYA untuk tujuan edukasi, penelitian keamanan, dan pengujian pada sistem yang telah mendapatkan izin tertulis (Authorized Penetration Testing).
-
-· Penulis (SevenByte) tidak bertanggung jawab atas penyalahgunaan alat ini.
-· Menggunakan alat ini untuk menyerang target tanpa izin adalah TINDAKAN PIDANA (UU ITE di Indonesia, atau hukum siber di negara lain).
-· Selalu gunakan target latihan legal seperti testphp.vulnweb.com, lab lokal (DVWA), atau VPS milikmu sendiri.
-· Jangan pernah menggunakan fitur Deploy Webshell atau Defacement pada sistem milik orang lain.
 
 ---
 
