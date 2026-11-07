@@ -71,10 +71,25 @@ Semua pengaturan tersimpan di config.json:
 
 ---
 
+## 📂 Struktur Project
+```
+7Pwn/
+├── index.js            # Main Router (Launcher)
+├── config.json         # Konfigurasi Global
+├── core/               # Logika Inti (Engine, UI, Path Analyzer)
+├── menus/              # Submenu Interaktif (Recon, Exploit, Post, Loot)
+├── modules/            # Modul Eksekusi (SQLi, RCE, Shell Manager)
+├── payloads/           # File Webshell & Deface
+├── wordlists/          # Daftar Payload (SQLi, LFI, RCE)
+├── logs/               # Log aktivitas HTTP & Error
+├── targets/            # Daftar URL target yang rentan
+├── loot/               # Tempat penyimpanan hasil dump database
+└── assets/             # Gambar untuk README
 🚧 Status Pengembangan
 
 7Pwn masih dalam tahap pengembangan aktif (Beta).
 Jika kamu menemukan bug, error, atau ingin memberikan saran fitur baru, silakan hubungi kontak di bawah ini. Kami sangat terbuka untuk feedback dari Security Researcher lain!
+```
 
 ---
 
