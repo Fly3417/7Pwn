@@ -11,9 +11,9 @@
 
 ## 📸 Tampilan Framework
 
-| Main Menu | Reconnaissance | Session End |
+| Reconnaissance | Main Menu | Session End |
 | :---: | :---: | :---: |
-| ![Menu](./assets/recon.png) | ![Recon](./assets/menu.png) | ![Exit](./assets/exit.png)) |
+| ![Recon](./assets/recon.png) | ![Menu](./assets/menu.png) | ![Exit](./assets/exit.png) |
 
 ---
 
@@ -73,23 +73,49 @@ Semua pengaturan tersimpan di config.json:
 
 ---
 
-📂 Struktur Project
+graph LR
+    %% Styling warna agar terlihat keren
+    classDef root fill:#0d1117,stroke:#00ffff,stroke-width:2px,color:#00ffff,font-weight:bold;
+    classDef folder fill:#161b22,stroke:#ffd700,stroke-width:1px,color:#ffd700;
+    classDef file fill:#161b22,stroke:#8b949e,stroke-width:1px,color:#c9d1d9;
 
-text
-7Pwn/
-├── index.js            # Main Router (Launcher)
-├── config.json         # Konfigurasi Global
-├── core/               # Logika Inti (Engine, UI, Path Analyzer)
-├── menus/              # Submenu Interaktif (Recon, Exploit, Post, Loot)
-├── modules/            # Modul Eksekusi (SQLi, RCE, Shell Manager)
-├── payloads/           # File Webshell & Deface
-├── wordlists/          # Daftar Payload (SQLi, LFI, RCE)
-├── logs/               # Log aktivitas HTTP & Error
-├── targets/            # Daftar URL target yang rentan
-├── loot/               # Tempat penyimpanan hasil dump database
-└── assets/             # Gambar untuk README
+    %% Node Utama
+    Root((7Pwn/)):::root
 
+    %% File di Root
+    Root --- I[index.js]:::file
+    Root --- C[config.json]:::file
+    Root --- P[package.json]:::file
 
+    %% Folder Core
+    Root --- Core(core/):::folder
+    Core --- C1[engine.js]:::file
+    Core --- C2[ui.js]:::file
+    Core --- C3[utils.js]:::file
+    Core --- C4[path_analyzer.js]:::file
+
+    %% Folder Menus
+    Root --- Menus(menus/):::folder
+    Menus --- M1[recon.js]:::file
+    Menus --- M2[exploit.js]:::file
+    Menus --- M3[post.js]:::file
+    Menus --- M4[loot_manager.js]:::file
+
+    %% Folder Modules
+    Root --- Mods(modules/):::folder
+    Mods --- Mo1[scanner.js]:::file
+    Mods --- Mo2[exploit_sqli.js]:::file
+    Mods --- Mo3[exploit_rce.js]:::file
+    Mods --- Mo4[shell_deployer.js]:::file
+    Mods --- Mo5[github_payloads.js]:::file
+
+    %% Folder Lainnya
+    Root --- PL(payloads/):::folder
+    Root --- WL(wordlists/):::folder
+    Root --- LG(logs/):::folder
+    Root --- TG(targets/):::folder
+    Root --- LT(loot/):::folder
+    Root --- AS(assets/):::folder
 ---
 
 🚧 Status Pengembangan
@@ -110,12 +136,11 @@ Jika kamu menemukan bug, error, atau ingin memberikan saran fitur baru, silakan 
 
 ---
 
-📬 Hubungi Saya (Laporkan Bug / Diskusi)
+## 📬 Hubungi Saya (Laporkan Bug / Diskusi)
 
-https://img.shields.io/badge/Email-akumuyui24%40gmail.com-red?style=for-the-badge&logo=gmail&logoColor=white
-https://img.shields.io/badge/Telegram-%40Sevenbyte7-blue?style=for-the-badge&logo=telegram&logoColor=white
-https://img.shields.io/badge/GitHub-Fly3417-black?style=for-the-badge&logo=github&logoColor=white
-
+[![Email](https://img.shields.io/badge/Email-akumuyui24%40gmail.com-red?style=for-the-badge&logo=gmail&logoColor=white)](mailto:akumuyui24@gmail.com)
+[![Telegram](https://img.shields.io/badge/Telegram-%40Sevenbyte7-blue?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Sevenbyte7)
+[![GitHub](https://img.shields.io/badge/GitHub-Fly3417-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Fly3417)
 ---
 
 Pwning Website Authorize - Build to Understand.
