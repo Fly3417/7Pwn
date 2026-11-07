@@ -1,0 +1,8 @@
+node_modules/
+Backup/
+logs/*.log
+targets/list.txt
+results/vulnerable.txt
+loot/
+*.bak
+config.json

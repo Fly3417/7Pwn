@@ -1,0 +1,5 @@
+/var/www/html/
+/var/www/
+/home/
+/public_html/
+/htdocs/
