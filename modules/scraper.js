@@ -6,14 +6,12 @@ const { checkVulnerability } = require('./scanner');
 const { sleep, logToFile } = require('../core/utils');
 const inquirer = require('inquirer');
 
-// Fungsi untuk memuat URL yang sudah ada agar tidak duplikat
 function loadExistingTargets() {
     if (!fs.existsSync('targets/list.txt')) return new Set();
     const content = fs.readFileSync('targets/list.txt', 'utf-8');
     const urls = new Set();
     content.split('\n').forEach(line => {
         if (line.trim() !== '') {
-            // Ambil URL sebelum tanda '|'
             urls.add(line.split('|')[0]);
         }
     });
@@ -25,34 +23,44 @@ async function scrapeAndValidate(dork, pages = 1) {
     const existingTargets = loadExistingTargets();
     const vulnerableUrls = [];
     
+    // Bersihkan dork dari tanda kutip ganda yang merusak query Bing
+    const cleanDork = dork.replace(/"/g, '');
+    
     console.log(`\n[*] Memulai Dorking + Auto-Validasi...`);
-    console.log(`[*] Dork: "${dork}"`);
+    console.log(`[*] Dork (Clean): "${cleanDork}"`);
     console.log(`[*] Mengambil ${pages} halaman...\n`);
     
-    // FASE 1: SCRAPING
     for (let i = 1; i <= pages; i++) {
         try {
             process.stdout.write(`    [+] Mengambil halaman ${i}... `);
-            // Rotasi Dork: Menambahkan kata kunci acak agar hasil selalu baru
-            const randomKeywords = ['shop', 'berita', 'toko', 'sekolah', 'layanan', 'product', 'news'];
+            
+            // Rotasi kata kunci agar hasil selalu dinamis
+            const randomKeywords = ['shop', 'berita', 'toko', 'sekolah', 'layanan', 'product', 'news', 'portal', 'data'];
             const randomWord = randomKeywords[Math.floor(Math.random() * randomKeywords.length)];
-            const finalDork = `${dork} ${randomWord}`;
+            const finalDork = `${cleanDork} ${randomWord}`;
 
             const response = await axios.get(`https://www.bing.com/search?q=${encodeURIComponent(finalDork)}&first=${(i - 1) * 10 + 1}`, {
-                headers: { 'User-Agent': config.user_agent, 'Accept-Language': 'en-US,en;q=0.9' },
-                timeout: config.timeout
+                headers: { 
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept-Language': 'en-US,en;q=0.9'
+                },
+                timeout: 15000
             });
             
             const $ = cheerio.load(response.data);
             let foundInPage = 0;
 
-            $('a').each((index, element) => {
-                const href = $(element).attr('href');
-                if (href && href.startsWith('http') && !href.includes('bing.com') && !href.includes('microsoft.com') && href.includes('=')) {
-                    // Cek duplikat: Jika belum ada di list.txt dan belum ada di antrean halaman ini
-                    if (!existingTargets.has(href) && !urls.has(href)) {
-                        urls.add(href);
-                        foundInPage++;
+            // Selector CSS yang lebih akurat untuk Bing: mencari link di dalam heading (h2)
+            $('li.b_algo h2 a').each((index, element) => {
+                let href = $(element).attr('href');
+                
+                if (href && href.startsWith('http') && !href.includes('bing.com') && !href.includes('microsoft.com')) {
+                    // Filter hanya URL yang punya parameter '='
+                    if (href.includes('=')) {
+                        if (!existingTargets.has(href) && !urls.has(href)) {
+                            urls.add(href);
+                            foundInPage++;
+                        }
                     }
                 }
             });
@@ -65,7 +73,8 @@ async function scrapeAndValidate(dork, pages = 1) {
     }
     
     if (urls.size === 0) {
-        console.log(`\n[X] Tidak ada URL baru yang ditemukan (mungkin semua sudah ada di list.txt).`);
+        console.log(`\n[X] Tidak ada URL baru yang ditemukan.`);
+        console.log(`    [!] Tips: Coba Dork lain tanpa tanda kutip, contoh: inurl:php?id= atau inurl:news.php?id=`);
         return [];
     }
 
@@ -90,26 +99,8 @@ async function scrapeAndValidate(dork, pages = 1) {
         await sleep(config.dorking.delay_between_tests_ms);
     }
 
-    // FASE 3: RINGKASAN & AUTO-EXPLOIT PROMPT
     if (vulnerableUrls.length > 0) {
-        console.log(`\n[V] SUKSES! ${vulnerableUrls.length} target rentan ditemukan.`);
-        
-        // FITUR BARU: Prompt Auto-Exploit
-        const { autoExploit } = await inquirer.prompt([
-            {
-                type: 'confirm',
-                name: 'autoExploit',
-                message: 'Langsung lakukan Auto-Exploit ke target yang baru ditemukan ini?',
-                default: false
-            }
-        ]);
-
-        if (autoExploit) {
-            // Kita panggil modul exploit (akan kita buat di fase selanjutnya)
-            console.log(`\n[*] Menyiapkan Auto-Exploit...`);
-            // return vulnerableUrls; // Modul index.js akan menangkap ini
-            return vulnerableUrls; 
-        }
+        console.log(`\n[V] SUKSES! ${vulnerableUrls.length} target rentan disimpan di targets/list.txt`);
     } else {
         console.log(`\n[X] Tidak ada target rentan yang ditemukan dari dork ini.`);
     }
