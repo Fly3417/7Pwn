@@ -9,7 +9,6 @@
 
 ---
 
-## 📸 Tampilan Framework
 
 ## 📸 Tampilan Framework
 
