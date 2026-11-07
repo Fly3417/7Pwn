@@ -13,7 +13,7 @@
 
 | Reconnaissance | Main Menu | Session End |
 | :---: | :---: | :---: |
-| ![Recon](./assets/recon.png) | ![Menu](./assets/menu.png) | ![Exit](./assets/exit.png) |
+| ![Recon](./assets/menu.png) | ![Menu](./assets/recon.png) | ![Exit](./assets/exit.png) |
 
 ---
 
