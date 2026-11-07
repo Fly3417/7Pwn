@@ -91,11 +91,10 @@ Semua pengaturan tersimpan di config.json:
 └── assets/             # Gambar untuk README
 ```
 ---
-🚧 Status Pengembangan
-
-7Pwn masih dalam tahap pengembangan aktif (Beta).
-Jika kamu menemukan bug, error, atau ingin memberikan saran fitur baru, silakan hubungi kontak di bawah ini. Kami sangat terbuka untuk feedback dari Security Researcher lain!
-
+> [!TIP]
+> **🚧 STATUS PENGEMBANGAN (BETA)**
+> 
+> `7Pwn` masih dalam tahap pengembangan aktif. Menemukan *bug* atau punya ide fitur baru? Silakan hubungi kontak di bawah ini. Kami sangat terbuka untuk *feedback* dari *Security Researcher* lain!
 ---
 
 > [!CAUTION]
