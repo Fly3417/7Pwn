@@ -13,7 +13,7 @@
 
 | Reconnaissance | Main Menu | Session End |
 | :---: | :---: | :---: |
-| ![Recon](./assets/recon.png) | ![Menu](./assets/menu.png) | ![Exit](./assets/exit.png) |
+| <img src="./assets/recon.png" width="250"> | <img src="./assets/menu.png" width="250"> | <img src="./assets/exit.png" width="250"> |
 ---
 
 ## 🚀 Fitur Utama (Kill Chain)
