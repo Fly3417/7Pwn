@@ -11,11 +11,9 @@
 
 ## 📸 Tampilan Framework
 
-<div style="overflow-x: auto; white-space: nowrap; padding-bottom: 10px;">
-  <img src="./assets/recon.jpg" width="300" style="margin-right: 10px; border-radius: 6px; border: 1px solid #1f2937;">
-  <img src="./assets/menu.png" width="300" style="margin-right: 10px; border-radius: 6px; border: 1px solid #1f2937;">
-  <img src="./assets/exit.jpg" width="300" style="margin-right: 10px; border-radius: 6px; border: 1px solid #1f2937;">
-</div>
+| Reconnaissance | Main Menu | Session End |
+| :---: | :---: | :---: |
+| <img src="./assets/recon.jpg" width="200"> | <img src="./assets/menu.png" width="200"> | <img src="./assets/exit.jpg" width="200"> |
 
 ---
 
