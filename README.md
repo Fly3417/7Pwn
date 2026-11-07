@@ -13,8 +13,7 @@
 
 | Reconnaissance | Main Menu | Session End |
 | :---: | :---: | :---: |
-| ![Recon](./assets/menu.png) | ![Menu](./assets/recon.png) | ![Exit](./assets/exit.png) |
-
+| <img src="./assets/recon.jpg" height="300"> | <img src="./assets/menu.png" height="300"> | <img src="./assets/exit.jpg" height="300"> |
 ---
 
 ## 🚀 Fitur Utama (Kill Chain)
@@ -71,51 +70,6 @@ Semua pengaturan tersimpan di config.json:
 · tamper_scripts: Daftar tamper SQLMap untuk melewati WAF.
 · use_proxy: Set true jika ingin menggunakan proxy (atur di proxy_url).
 
----
-
-graph LR
-    %% Styling warna agar terlihat keren
-    classDef root fill:#0d1117,stroke:#00ffff,stroke-width:2px,color:#00ffff,font-weight:bold;
-    classDef folder fill:#161b22,stroke:#ffd700,stroke-width:1px,color:#ffd700;
-    classDef file fill:#161b22,stroke:#8b949e,stroke-width:1px,color:#c9d1d9;
-
-    %% Node Utama
-    Root((7Pwn/)):::root
-
-    %% File di Root
-    Root --- I[index.js]:::file
-    Root --- C[config.json]:::file
-    Root --- P[package.json]:::file
-
-    %% Folder Core
-    Root --- Core(core/):::folder
-    Core --- C1[engine.js]:::file
-    Core --- C2[ui.js]:::file
-    Core --- C3[utils.js]:::file
-    Core --- C4[path_analyzer.js]:::file
-
-    %% Folder Menus
-    Root --- Menus(menus/):::folder
-    Menus --- M1[recon.js]:::file
-    Menus --- M2[exploit.js]:::file
-    Menus --- M3[post.js]:::file
-    Menus --- M4[loot_manager.js]:::file
-
-    %% Folder Modules
-    Root --- Mods(modules/):::folder
-    Mods --- Mo1[scanner.js]:::file
-    Mods --- Mo2[exploit_sqli.js]:::file
-    Mods --- Mo3[exploit_rce.js]:::file
-    Mods --- Mo4[shell_deployer.js]:::file
-    Mods --- Mo5[github_payloads.js]:::file
-
-    %% Folder Lainnya
-    Root --- PL(payloads/):::folder
-    Root --- WL(wordlists/):::folder
-    Root --- LG(logs/):::folder
-    Root --- TG(targets/):::folder
-    Root --- LT(loot/):::folder
-    Root --- AS(assets/):::folder
 ---
 
 🚧 Status Pengembangan
