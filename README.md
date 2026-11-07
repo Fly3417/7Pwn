@@ -13,7 +13,7 @@
 
 | Main Menu | Reconnaissance | Session End |
 | :---: | :---: | :---: |
-| ![Menu](./assets/menu.png) | ![Recon](./assets/recon.png) | ![Exit](./assets/exit.png) |
+| ![Menu](./assets/recon.png) | ![Recon](./assets/menu.jpg) | ![Exit](./assets/exit.jpg) |
 
 ---
 
@@ -21,20 +21,23 @@
 
 `7Pwn` membagi proses *Pwning* menjadi 4 fase otomatis:
 
-1. **Reconnaissance (Menu 1):**
-   - **Mass Dorking:** Mencari target massal via Bing dengan rotasi kata kunci.
-   - **Auto-Validate:** Langsung mengetes URL yang ditemukan dengan *payload* SQLi/LFI/RCE.
-   - **GitHub Payload Manager:** Mengunduh ribuan *payload* dari repositori GitHub (mendukung Token untuk menghindari *rate limit*).
-   - **WAF Detector:** Mendeteksi proteksi (Cloudflare, Imperva) sebelum menyerang.
-2. **Exploitation (Menu 2):**
-   - **Auto-Exploit SQLi:** Menembak target dengan `sqlmap` secara *real-time*.
-   - **Auto-Exploit RCE/LFI:** Menembakkan *payload* Command Injection & membaca file server.
-   - **Auto-Path Analyzer:** Menganalisis *error message* untuk menemukan *Document Root* server (tidak menebak `/var/www/html/`).
-3. **Weaponize / Deploy (Menu 2 -> 3):**
-   - Menanam *Webshell* via `INTO OUTFILE`. Bisa dari file lokal HP atau *Raw URL* GitHub.
-4. **Post-Exploitation (Menu 3):**
-   - **Interactive Shell:** Terminal interaktif (RCE) untuk mengeksekusi perintah (`ls`, `whoami`, `cat /etc/passwd`).
-   - **Defacement:** Mengubah halaman depan target.
+**1. Reconnaissance (Menu 1):**
+- **Mass Dorking:** Mencari target massal via Bing dengan rotasi kata kunci.
+- **Auto-Validate:** Langsung mengetes URL yang ditemukan dengan *payload* SQLi/LFI/RCE.
+- **GitHub Payload Manager:** Mengunduh ribuan *payload* dari repositori GitHub (mendukung Token untuk menghindari *rate limit*).
+- **WAF Detector:** Mendeteksi proteksi (Cloudflare, Imperva) sebelum menyerang.
+
+**2. Exploitation (Menu 2):**
+- **Auto-Exploit SQLi:** Menembak target dengan `sqlmap` secara *real-time*.
+- **Auto-Exploit RCE/LFI:** Menembakkan *payload* Command Injection & membaca file server.
+- **Auto-Path Analyzer:** Menganalisis *error message* untuk menemukan *Document Root* server (tidak menebak `/var/www/html/`).
+
+**3. Weaponize / Deploy (Menu 2 -> 3):**
+- Menanam *Webshell* via `INTO OUTFILE`. Bisa dari file lokal HP atau *Raw URL* GitHub.
+
+**4. Post-Exploitation (Menu 3):**
+- **Interactive Shell:** Terminal interaktif (RCE) untuk mengeksekusi perintah (`ls`, `whoami`, `cat /etc/passwd`).
+- **Defacement:** Mengubah halaman depan target.
 
 ---
 
@@ -116,4 +119,3 @@ https://img.shields.io/badge/GitHub-Fly3417-black?style=for-the-badge&logo=githu
 ---
 
 Pwning Website Authorize - Build to Understand.
-
