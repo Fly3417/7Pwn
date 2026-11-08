@@ -158,9 +158,14 @@ Semua pengaturan utama tersimpan di dalam file `config.json`:
 
 ## 📬 Hubungi Saya (Laporkan Bug / Diskusi)
 
-[![Email](https://img.shields.io/badge/Email-sevenbyte071%40gmail.com-red?style=for-the-badge&logo=gmail&logoColor=white)](mailto:sevenbyte071@gmail.com)
-[![Telegram](https://img.shields.io/badge/Telegram-%40Sevenbyte7-blue?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Sevenbyte7)
-[![GitHub](https://img.shields.io/badge/GitHub-Fly3417-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Fly3417)
-
----
-*Pwning Website Authorize - Build to Understand.*
+<p align="left">
+  <a href="mailto:sevenbyte071@gmail.com">
+    <img src="https://img.shields.io/badge/Email-sevenbyte071%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" />
+  </a>
+  <a href="https://t.me/Sevenbyte7">
+    <img src="https://img.shields.io/badge/Telegram-@Sevenbyte7-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" />
+  </a>
+  <a href="https://github.com/Fly3417">
+    <img src="https://img.shields.io/badge/GitHub-Fly3417-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+</p>
