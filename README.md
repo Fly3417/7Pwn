@@ -136,7 +136,7 @@ Semua pengaturan utama tersimpan di dalam file `config.json`:
 ## 🚧 Status Pengembangan
 
 > [!NOTE]
-> **7Pwn v6.2.0 (Beta)**
+> **7Pwn v6.1.0 (Beta)**
 > 
 > Framework ini masih dalam tahap pengembangan aktif. Saat ini, `7Pwn` sudah mendukung *Smart Recon*, *CMS Profiling* (WordPress/Drupal), dan *Auto-Exploit SQLi*. 
 > 
